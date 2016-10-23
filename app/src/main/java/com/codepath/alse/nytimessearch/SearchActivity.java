@@ -15,9 +15,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.codepath.alse.nytimessearch.Adapter.ArticleArrayAdapter;
 import com.codepath.alse.nytimessearch.Model.Article;
@@ -42,8 +41,6 @@ import okhttp3.Response;
 
 public class SearchActivity extends AppCompatActivity implements FilterDialogFragment.SaveFilterListener{
 
-    @BindView(R.id.search_btn)Button searchButton;
-    @BindView(R.id.search_etext)EditText searchText;
     @BindView(R.id.search_gview) GridView resultGridView;
     ArrayList<Article> articles;
     ArticleArrayAdapter articleArrayAdapter;
@@ -142,14 +139,18 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
         fD.show(m,"dd");
     }
 
-    //onClick method of Search button
+    //Search method when clicked on Search icon
     public void onArticleSearch(String query) {
-
-    //    String text = searchText.getText().toString();
         queryString = query;
         articles.clear();
         articleArrayAdapter.notifyDataSetChanged();
-        makeNetworkCall(query,0);
+        boolean isInternet = NetworkingCalls.isNetworkAvailable(this);
+        if(!isInternet){
+            Toast.makeText(this,"No Internet",Toast.LENGTH_LONG).show();
+        }
+        else {
+            makeNetworkCall(query, 0);
+        }
     }
 
     public void makeNetworkCall(String query, final int page){
@@ -213,9 +214,13 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
     public void onSaveFilter(Filter f) {
         Log.v("InsideOnSaveFiltre","dfsdf");
         filter = f;
-        String text = searchText.getText().toString();
-        Log.v("InsideOnSaveFiltre",text);
-        makeNetworkCall(queryString,0);
+        Log.v("InsideOnSaveFiltre",queryString);
+        if(!NetworkingCalls.isNetworkAvailable(this)){
+            Toast.makeText(this,"No Internet",Toast.LENGTH_LONG).show();
+        }
+        else {
+            makeNetworkCall(queryString, 0);
+        }
     }
 
     public String getNewsString(){
