@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="article"
+            type="com.codepath.alse.nytimessearch.Model.Article"/>
+    </data>
 <android.support.v7.widget.CardView
     android:id="@+id/card_view"
     android:layout_width="match_parent"
@@ -18,15 +23,16 @@
             android:id="@+id/recycler_item_title"
             android:adjustViewBounds="true"
             android:scaleType="centerCrop"
+            android:text="@{article.headline}"
             />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/recycler_item_overview"
-            android:text="hi"
             android:maxLines="4"
             android:minLines="2"
-            android:ellipsize="end"/>
+            android:ellipsize="end"
+            android:text="@{article.overview}"/>
 
 
     </LinearLayout>

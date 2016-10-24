@@ -2,6 +2,7 @@ package com.codepath.alse.nytimessearch.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.databinding.BindingAdapter;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -9,8 +10,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.codepath.alse.nytimessearch.ArticleActivity;
+import com.codepath.alse.nytimessearch.BR;
 import com.codepath.alse.nytimessearch.Model.Article;
 import com.codepath.alse.nytimessearch.R;
 import com.codepath.alse.nytimessearch.databinding.GridItemBinding;
@@ -74,19 +77,28 @@ public class ArticleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
 
     public void configureImageViewHolder(ViewHolderImage holder, int position){
         Article article = articleList.get(position);
-        holder.binding.gridItemHeadline.setText(article.getHeadline());
+        holder.binding.setVariable(BR.article,article);
+        holder.binding.executePendingBindings();
+    /*    holder.binding.gridItemHeadline.setText(article.getHeadline());
        // holder.headline.setText(article.getHeadline());
         //  if(article.getThumbnail()!=null)
         Picasso.with(mContext).load(article.getThumbnail()).placeholder(R.color.colorPrimary).
-                into(holder.binding.gridItemImage);
+                into(holder.binding.gridItemImage);*/
 
+    }
+    @BindingAdapter("bind:imageUrl")
+    public static void loadImage(ImageView imageView, String url){
+        Picasso.with(imageView.getContext()).load(url).placeholder(R.color.colorPrimary).
+                into(imageView);
     }
     public void configureTitleViewHolder(ViewHolderTitle holder, int position){
         Article article = articleList.get(position);
+        holder.binding.setVariable(BR.article,article);
+        holder.binding.executePendingBindings();
       //  holder.headline.setText(article.getHeadline());
         //holder.overview.setText(article.getOverview());
-        holder.binding.recyclerItemTitle.setText(article.getHeadline());
-        holder.binding.recyclerItemTitle.setText(article.getOverview());
+     //   holder.binding.recyclerItemTitle.setText(article.getHeadline());
+       // holder.binding.recyclerItemTitle.setText(article.getOverview());
 
     }
     @Override
