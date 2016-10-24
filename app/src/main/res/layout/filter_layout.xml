@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<layout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <variable
+            name="handlers"
+            type="com.codepath.alse.nytimessearch.FilterDialogFragment"/>
+    </data>
+<RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
@@ -30,6 +36,7 @@
         android:layout_marginLeft="15dp"
         android:layout_marginStart="15dp"
         android:id="@+id/sort_dateValue"
+        android:onClick="@{handlers.onCheck}"
         android:editable="false"
         android:clickable="true"/>
 
@@ -87,17 +94,20 @@
             android:layout_height="wrap_content"
             android:id="@+id/checkbox_arts"
             android:text="Arts"
+            android:onClick="@{handlers.onCheck}"
             />
         <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/checkbox_fashion"
-            android:text="Fashion and Style"/>
+            android:text="Fashion and Style"
+            android:onClick="@{handlers.onCheck}"/>
         <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/checkbox_sports"
-            android:text="Sports"/>
+            android:text="Sports"
+            android:onClick="@{handlers.onCheck}"/>
 
     </LinearLayout>
     <Button
@@ -106,5 +116,7 @@
         android:layout_below="@id/news_values"
         android:text="save"
         android:id="@+id/filter_save"
+        android:onClick="@{handlers.onCheck}"
         />
 </RelativeLayout>
+</layout>

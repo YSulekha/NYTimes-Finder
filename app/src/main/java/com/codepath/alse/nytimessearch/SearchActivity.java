@@ -20,6 +20,8 @@ import android.widget.Toast;
 
 import com.codepath.alse.nytimessearch.Adapter.ArticleRecyclerViewAdapter;
 import com.codepath.alse.nytimessearch.Model.Article;
+import com.codepath.alse.nytimessearch.Model.ArticleResponse;
+import com.codepath.alse.nytimessearch.Model.Doc;
 import com.codepath.alse.nytimessearch.Model.Filter;
 import com.codepath.alse.nytimessearch.databinding.ActivitySearchBinding;
 
@@ -30,6 +32,7 @@ import org.parceler.Parcels;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -37,6 +40,7 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import retrofit2.Retrofit;
 
 public class SearchActivity extends AppCompatActivity implements FilterDialogFragment.SaveFilterListener{
 
@@ -54,7 +58,6 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-   //     setContentView(R.layout.activity_search);
        binding = DataBindingUtil.setContentView(this, R.layout.activity_search);
         Toolbar toolbar = binding.toolbar;
 
@@ -102,6 +105,8 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
                 return true;
             }
         });*/
+
+
     }
 
     public void loadMoreDataFromApi(int page){
@@ -155,7 +160,7 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
         FragmentManager m = getSupportFragmentManager();
         Bundle args = new Bundle();
         args.putParcelable("Filter", Parcels.wrap(filter));
-        FilterDialogFragment fD = FilterDialogFragment.newInstance(args);
+        FilterDialogFragment fD = FilterDialogFragment.newInstance(this,args);
         fD.show(m,"dd");
     }
 
@@ -171,6 +176,7 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
             Toast.makeText(this,"No Internet",Toast.LENGTH_LONG).show();
         }
         else {
+          //  networkCalls(query,0);
             makeNetworkCall(query, 0);
         }
     }
@@ -224,12 +230,9 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
                         //   articles.clear();
                    //     articles.addAll(Article.processJSONArray(responseArray));
                     //}
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            articleRecyclerViewAdapter.notifyItemRangeInserted(curSize,newItems.size());
-                          //  articleAdapter.notifyDataSetChanged();
-                        }
+                    runOnUiThread(() -> {
+                        articleRecyclerViewAdapter.notifyItemRangeInserted(curSize,newItems.size());
+                      //  articleAdapter.notifyDataSetChanged();
                     });
 
 
@@ -241,6 +244,29 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
 
     }
 
+    public void networkCalls(String query, final int page){
+    String apiKey = BuildConfig.NYTIMES_API_KEY;
+
+        Retrofit retrofit = ApiClient.getClient();
+        ApiInterface apiService = retrofit.create(ApiInterface.class);
+        retrofit2.Call<ArticleResponse> call = apiService.getArticleList(page,apiKey,query);
+        call.enqueue(new retrofit2.Callback<ArticleResponse>() {
+            @Override
+            public void onResponse(retrofit2.Call<ArticleResponse> call, retrofit2.Response<ArticleResponse> response) {
+                ArticleResponse articleResponse = response.body();
+                List<Doc> articles = response.body().getDocs();
+                for(int i=0;i<articles.size();i++){
+                    Log.v("articles",articles.get(0).getWebUrl());
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<ArticleResponse> call, Throwable t) {
+
+            }
+        });
+    }
+
     @Override
     public void onSaveFilter(Filter f) {
         Log.v("InsideOnSaveFiltre","dfsdf");
@@ -250,6 +276,10 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
             Toast.makeText(this,"No Internet",Toast.LENGTH_LONG).show();
         }
         else {
+            articles.clear();
+            //  articleAdapter.notifyDataSetChanged();
+            articleRecyclerViewAdapter.notifyDataSetChanged();
+            scrollRecyclerViewListener.resetState();
             makeNetworkCall(queryString, 0);
         }
     }

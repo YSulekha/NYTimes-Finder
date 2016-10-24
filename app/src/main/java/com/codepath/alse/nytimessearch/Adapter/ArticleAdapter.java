@@ -20,8 +20,7 @@ import com.squareup.picasso.Target;
 
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 
 public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHolder> {
 
@@ -61,14 +60,14 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,Target{
-        @BindView(R.id.grid_item_image)
+     //   @BindView(R.id.grid_item_image)
         DynamicHeightImageView thumbnail;
-        @BindView(R.id.grid_item_headline)
+       // @BindView(R.id.grid_item_headline)
         TextView headline;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this,itemView);
+       //     ButterKnife.bind(this,itemView);
             itemView.setOnClickListener(this);
         }
 

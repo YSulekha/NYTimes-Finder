@@ -15,8 +15,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 
 /**
  * Created by aharyadi on 10/20/16.
@@ -49,11 +48,13 @@ public class ArticleArrayAdapter extends ArrayAdapter<Article> {
     }
 
     class ArticleItemViewHolder{
-        @BindView(R.id.grid_item_image) ImageView thumbnail;
-        @BindView(R.id.grid_item_headline) TextView headline;
+      //  @BindView(R.id.grid_item_image)
+        ImageView thumbnail;
+        //@BindView(R.id.grid_item_headline)
+        TextView headline;
 
         public ArticleItemViewHolder(View v){
-            ButterKnife.bind(this,v);
+            //ButterKnife.bind(this,v);
         }
 
     }

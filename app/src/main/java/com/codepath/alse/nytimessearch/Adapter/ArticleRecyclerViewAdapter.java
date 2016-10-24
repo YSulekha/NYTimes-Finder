@@ -1,25 +1,31 @@
 package com.codepath.alse.nytimessearch.Adapter;
 
+import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.BindingAdapter;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.codepath.alse.nytimessearch.ArticleActivity;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.Request;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.codepath.alse.nytimessearch.BR;
 import com.codepath.alse.nytimessearch.Model.Article;
 import com.codepath.alse.nytimessearch.R;
 import com.codepath.alse.nytimessearch.databinding.GridItemBinding;
 import com.codepath.alse.nytimessearch.databinding.RecycerItemBinding;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.util.List;
 
@@ -29,10 +35,11 @@ import java.util.List;
 
 public class ArticleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private Context mContext;
+    static private Context mContext;
     private List<Article> articleList;
     private static final int  TITLE = 0;
     private static final int IMAGE = 1;
+
 
     public ArticleRecyclerViewAdapter(Context context, List<Article> list){
         this.mContext = context;
@@ -79,26 +86,17 @@ public class ArticleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
         Article article = articleList.get(position);
         holder.binding.setVariable(BR.article,article);
         holder.binding.executePendingBindings();
-    /*    holder.binding.gridItemHeadline.setText(article.getHeadline());
-       // holder.headline.setText(article.getHeadline());
-        //  if(article.getThumbnail()!=null)
-        Picasso.with(mContext).load(article.getThumbnail()).placeholder(R.color.colorPrimary).
-                into(holder.binding.gridItemImage);*/
-
     }
     @BindingAdapter("bind:imageUrl")
     public static void loadImage(ImageView imageView, String url){
-        Picasso.with(imageView.getContext()).load(url).placeholder(R.color.colorPrimary).
-                into(imageView);
+    //    Picasso.with(imageView.getContext()).load(url).placeholder(R.color.colorPrimary).
+         //      // into(imageView);
+        Glide.with(mContext).load(url).placeholder(R.color.colorPrimary).into(imageView);
     }
     public void configureTitleViewHolder(ViewHolderTitle holder, int position){
         Article article = articleList.get(position);
         holder.binding.setVariable(BR.article,article);
         holder.binding.executePendingBindings();
-      //  holder.headline.setText(article.getHeadline());
-        //holder.overview.setText(article.getOverview());
-     //   holder.binding.recyclerItemTitle.setText(article.getHeadline());
-       // holder.binding.recyclerItemTitle.setText(article.getOverview());
 
     }
     @Override
@@ -115,18 +113,34 @@ public class ArticleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
     public int getItemCount() {
         return articleList.size();
     }
+    public void shareIntent(String url){
 
-    class ViewHolderImage extends RecyclerView.ViewHolder implements View.OnClickListener,Target {
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+
+        Activity activity = (Activity)mContext;
+
+        Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ic_action_share);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, url);
+        int requestCode = 100;
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setActionButton(bitmap, "Share Link", pendingIntent, true);
+        CustomTabsIntent customTabsIntent = builder.build();
+        customTabsIntent.launchUrl(activity, Uri.parse(url));
+    }
+
+
+    class ViewHolderImage extends RecyclerView.ViewHolder implements View.OnClickListener, com.bumptech.glide.request.target.Target<Bitmap>{
         GridItemBinding binding;
-    /*    @BindView(R.id.grid_item_image)
-        DynamicHeightImageView thumbnail;
-        @BindView(R.id.grid_item_headline)
-        TextView headline;*/
 
         public ViewHolderImage(View itemView) {
             super(itemView);
             binding = DataBindingUtil.bind(itemView);
-         //   ButterKnife.bind(this,itemView);
             itemView.setOnClickListener(this);
         }
 
@@ -135,13 +149,16 @@ public class ArticleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
             int position = getAdapterPosition();
             if(position != RecyclerView.NO_POSITION){
                 Article article = articleList.get(position);
-                Intent intent = new Intent(mContext,ArticleActivity.class);
+             /*   Intent intent = new Intent(mContext,ArticleActivity.class);
                 intent.putExtra("Article",article.getWeb_url());
-                mContext.startActivity(intent);
+                mContext.startActivity(intent);*/
+                shareIntent(article.getWeb_url());
             }
         }
 
-        @Override
+
+
+    /*    @Override
         public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
             float ratio = (float)bitmap.getHeight()/(float)bitmap.getWidth();
             binding.gridItemImage.setHeightRatio(ratio);
@@ -156,18 +173,70 @@ public class ArticleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
         @Override
         public void onPrepareLoad(Drawable placeHolderDrawable) {
 
+        }*/
+
+
+       @Override
+        public void onLoadStarted(Drawable placeholder) {
+
+        }
+
+        @Override
+        public void onLoadFailed(Exception e, Drawable errorDrawable) {
+
+        }
+
+        @Override
+        public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
+            float ratio = (float)bitmap.getHeight()/(float)bitmap.getWidth();
+            binding.gridItemImage.setHeightRatio(ratio);
+            binding.gridItemImage.setImageBitmap(bitmap);
+        }
+
+        @Override
+        public void onLoadCleared(Drawable placeholder) {
+
+        }
+
+        @Override
+        public void getSize(SizeReadyCallback cb) {
+
+        }
+
+        @Override
+        public void setRequest(Request request) {
+
+        }
+
+        @Override
+        public Request getRequest() {
+            return null;
+        }
+
+        @Override
+        public void onStart() {
+
+        }
+
+        @Override
+        public void onStop() {
+
+        }
+
+        @Override
+        public void onDestroy() {
+
         }
     }
    public class ViewHolderTitle extends RecyclerView.ViewHolder implements View.OnClickListener{
         private RecycerItemBinding binding;
-  /*      @BindView(R.id.recycler_item_title)
-        TextView overview;
-        @BindView(R.id.recycler_item_overview)
-        TextView headline;*/
+       Activity activity;
 
         public ViewHolderTitle(View itemView) {
             super(itemView);
+
             binding = DataBindingUtil.bind(itemView);
+
             itemView.setOnClickListener(this);
         }
 
@@ -176,9 +245,11 @@ public class ArticleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
             int position = getAdapterPosition();
             if(position != RecyclerView.NO_POSITION){
                 Article article = articleList.get(position);
-                Intent intent = new Intent(mContext,ArticleActivity.class);
+           /*     Intent intent = new Intent(mContext,ArticleActivity.class);
                 intent.putExtra("Article",article.getWeb_url());
-                mContext.startActivity(intent);
+                mContext.startActivity(intent);*/
+                shareIntent(article.getWeb_url());
+
             }
         }
 

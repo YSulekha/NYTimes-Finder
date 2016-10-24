@@ -2,6 +2,8 @@ package com.codepath.alse.nytimessearch;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.Context;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,14 +19,11 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.codepath.alse.nytimessearch.Model.Filter;
+import com.codepath.alse.nytimessearch.databinding.FilterLayoutBinding;
 
 import org.parceler.Parcels;
 
 import java.util.Calendar;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 import static com.codepath.alse.nytimessearch.R.id.checkbox_arts;
 import static com.codepath.alse.nytimessearch.R.id.checkbox_fashion;
@@ -38,10 +37,11 @@ import static com.codepath.alse.nytimessearch.R.id.sort_dateValue;
 
 public class FilterDialogFragment extends DialogFragment {
     Filter filter;
-    @BindView(R.id.sort_order) Spinner sort;
-    @BindView(checkbox_arts) CheckBox arts;
-    @BindView(R.id.checkbox_fashion) CheckBox fashion;
-    @BindView(R.id.checkbox_sports) CheckBox sports;
+    Spinner sort;
+    CheckBox arts;
+   CheckBox fashion;
+     CheckBox sports;
+    FilterLayoutBinding binding;
      static EditText date;
     SaveFilterListener listener;
     boolean isArts = false;
@@ -49,6 +49,7 @@ public class FilterDialogFragment extends DialogFragment {
     boolean isSports = false;
     static String mDate;
     String news = "news_desk:(";
+    static Context mContext;
 
 
     public interface SaveFilterListener{
@@ -59,26 +60,36 @@ public class FilterDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
     }
 
-    public static FilterDialogFragment newInstance(Bundle args) {
+    public static FilterDialogFragment newInstance(Context context,Bundle args) {
 
         FilterDialogFragment fragment = new FilterDialogFragment();
         fragment.setArguments(args);
+        mContext = context;
         return fragment;
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.filter_layout,container);
+ binding = DataBindingUtil.inflate(LayoutInflater.from(getContext()), R.layout.filter_layout, null, false);
+
+        binding.setHandlers(this);
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        ButterKnife.bind(this, view);
+      //  ButterKnife.bind(this, view);
+
         filter = (Filter) Parcels.unwrap(getArguments().getParcelable("Filter"));
 
 
-        date = (EditText) view.findViewById(R.id.sort_dateValue);
+       // date = (EditText) view.findViewById(R.id.sort_dateValue);
+        date = binding.sortDateValue;
+        sort = binding.sortOrder;
+        arts = binding.checkboxArts;
+        fashion = binding.checkboxFashion;
+        sports = binding.checkboxSports;
         if(filter.getDate() != null){
             date.setText(filter.getDate());
         }
@@ -94,8 +105,8 @@ public class FilterDialogFragment extends DialogFragment {
         sports.setChecked(filter.isSports());
     }
 
-    @OnClick ({R.id.checkbox_arts,R.id.checkbox_sports,R.id.checkbox_fashion,R.id.filter_save,sort_dateValue})
-    public void onCheck(View v){
+   // @OnClick ({R.id.checkbox_arts,R.id.checkbox_sports,R.id.checkbox_fashion,R.id.filter_save,sort_dateValue})
+    public  void onCheck(View v){
         switch(v.getId()){
             case checkbox_arts:
                 if(arts.isChecked()) {
