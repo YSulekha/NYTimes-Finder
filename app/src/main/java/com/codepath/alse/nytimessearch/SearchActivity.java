@@ -1,26 +1,27 @@
 package com.codepath.alse.nytimessearch;
 
-import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.Toast;
 
-import com.codepath.alse.nytimessearch.Adapter.ArticleArrayAdapter;
+import com.codepath.alse.nytimessearch.Adapter.ArticleRecyclerViewAdapter;
 import com.codepath.alse.nytimessearch.Model.Article;
 import com.codepath.alse.nytimessearch.Model.Filter;
+import com.codepath.alse.nytimessearch.databinding.ActivitySearchBinding;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,8 +31,6 @@ import org.parceler.Parcels;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
@@ -41,23 +40,34 @@ import okhttp3.Response;
 
 public class SearchActivity extends AppCompatActivity implements FilterDialogFragment.SaveFilterListener{
 
-    @BindView(R.id.search_gview) GridView resultGridView;
+    RecyclerView resultRecyclerView;
     ArrayList<Article> articles;
-    ArticleArrayAdapter articleArrayAdapter;
+   // ArticleArrayAdapter articleArrayAdapter;
+ //   ArticleAdapter articleAdapter;
+    ArticleRecyclerViewAdapter articleRecyclerViewAdapter;
     Filter filter = new Filter();
     int pageN=0;
     String queryString;
+    EndlessScrollRecyclerViewListener scrollRecyclerViewListener;
+    ActivitySearchBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search);
-        ButterKnife.bind(this);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+   //     setContentView(R.layout.activity_search);
+       binding = DataBindingUtil.setContentView(this, R.layout.activity_search);
+        Toolbar toolbar = binding.toolbar;
+
         setSupportActionBar(toolbar);
+        resultRecyclerView = binding.searchRel.searchRview;
         articles = new ArrayList<>();
-        articleArrayAdapter = new ArticleArrayAdapter(this,articles);
-        resultGridView.setAdapter(articleArrayAdapter);
+        //articleArrayAdapter = new ArticleArrayAdapter(this,articles);
+       // resultGridView.setAdapter(articleArrayAdapter);
+    //    articleAdapter = new ArticleAdapter(this,articles);
+        articleRecyclerViewAdapter = new ArticleRecyclerViewAdapter(this,articles);
+        resultRecyclerView.setAdapter(articleRecyclerViewAdapter);
+        StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL);
+        resultRecyclerView.setLayoutManager(staggeredGridLayoutManager);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,22 +76,32 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
                         .setAction("Action", null).show();
             }
         });
-        resultGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        scrollRecyclerViewListener = new EndlessScrollRecyclerViewListener(staggeredGridLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemCount, RecyclerView view) {
+                loadMoreDataFromApi(page);
+
+            }
+        };
+        resultRecyclerView.addOnScrollListener(scrollRecyclerViewListener);
+        SpacesItemDecoration itemDecoration = new SpacesItemDecoration(8);
+        resultRecyclerView.addItemDecoration(itemDecoration);
+ /*       resultGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(SearchActivity.this,ArticleActivity.class);
                 intent.putExtra("Article",articles.get(i).getWeb_url());
                 startActivity(intent);
             }
-        });
-        resultGridView.setOnScrollListener(new EndlessScrollListener() {
+        });*/
+    /*    resultGridView.setOnScrollListener(new EndlessScrollListener() {
             @Override
             public boolean onLoadMore(int page, int totalItemCount) {
                 Log.v("LoadMore", String.valueOf(page));
                 loadMoreDataFromApi(page);
                 return true;
             }
-        });
+        });*/
     }
 
     public void loadMoreDataFromApi(int page){
@@ -143,7 +163,9 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
     public void onArticleSearch(String query) {
         queryString = query;
         articles.clear();
-        articleArrayAdapter.notifyDataSetChanged();
+      //  articleAdapter.notifyDataSetChanged();
+        articleRecyclerViewAdapter.notifyDataSetChanged();
+        scrollRecyclerViewListener.resetState();
         boolean isInternet = NetworkingCalls.isNetworkAvailable(this);
         if(!isInternet){
             Toast.makeText(this,"No Internet",Toast.LENGTH_LONG).show();
@@ -192,12 +214,21 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
                     JSONObject responseJson = new JSONObject(responseData);
                     Log.v("response",responseJson.toString());
                     JSONArray responseArray = responseJson.getJSONObject("response").getJSONArray("docs");
-                 //   articles.clear();
-                    articles.addAll(Article.processJSONArray(responseArray));
+                 //   if(page > 0){
+                       final int curSize = articleRecyclerViewAdapter.getItemCount();
+                      final  ArrayList<Article> newItems = Article.processJSONArray(responseArray);
+                        articles.addAll(newItems);
+
+                  //  }
+                 //   else {
+                        //   articles.clear();
+                   //     articles.addAll(Article.processJSONArray(responseArray));
+                    //}
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            articleArrayAdapter.notifyDataSetChanged();
+                            articleRecyclerViewAdapter.notifyItemRangeInserted(curSize,newItems.size());
+                          //  articleAdapter.notifyDataSetChanged();
                         }
                     });
 

@@ -19,6 +19,12 @@ public class Article {
     String thumbnail;
     String headline;
 
+    public String getOverview() {
+        return overview;
+    }
+
+    String overview;
+
     public Article(){
 
     }
@@ -46,6 +52,12 @@ public class Article {
                 Log.v("thimbnail",this.thumbnail);
             }
             this.headline = jsonObject.getJSONObject("headline").getString("main");
+            if(jsonObject.getString("lead_paragraph")==null){
+                overview = jsonObject.getString("snippet");
+            }
+            else{
+                overview = jsonObject.getString("lead_paragraph");
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
