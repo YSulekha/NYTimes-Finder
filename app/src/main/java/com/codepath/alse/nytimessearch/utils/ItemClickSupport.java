@@ -1,7 +1,9 @@
-package com.codepath.alse.nytimessearch;
+package com.codepath.alse.nytimessearch.utils;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+
+import com.codepath.alse.nytimessearch.R;
 
 /**
  * Created by aharyadi on 10/24/16.
@@ -51,7 +53,7 @@ public class ItemClickSupport {
 
     private ItemClickSupport(RecyclerView recyclerView) {
         mRecyclerView = recyclerView;
-        mRecyclerView.setTag(R.id.item_click_support, this);
+        mRecyclerView.setTag(com.codepath.alse.nytimessearch.R.id.item_click_support, this);
         mRecyclerView.addOnChildAttachStateChangeListener(mAttachListener);
     }
 

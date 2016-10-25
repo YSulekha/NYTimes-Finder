@@ -11,8 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.codepath.alse.nytimessearch.ArticleActivity;
-import com.codepath.alse.nytimessearch.DynamicHeightImageView;
+import com.codepath.alse.nytimessearch.activities.ArticleActivity;
+import com.codepath.alse.nytimessearch.utils.DynamicHeightImageView;
 import com.codepath.alse.nytimessearch.Model.Article;
 import com.codepath.alse.nytimessearch.R;
 import com.squareup.picasso.Picasso;

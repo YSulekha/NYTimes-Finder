@@ -1,4 +1,4 @@
-package com.codepath.alse.nytimessearch;
+package com.codepath.alse.nytimessearch.fragments;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -19,6 +19,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.codepath.alse.nytimessearch.Model.Filter;
+import com.codepath.alse.nytimessearch.R;
+import com.codepath.alse.nytimessearch.activities.SearchActivity;
 import com.codepath.alse.nytimessearch.databinding.FilterLayoutBinding;
 
 import org.parceler.Parcels;
@@ -36,6 +38,8 @@ import static com.codepath.alse.nytimessearch.R.id.sort_dateValue;
  */
 
 public class FilterDialogFragment extends DialogFragment {
+
+    public final static String EXTRA_FILTER = "extra_fliter";
     Filter filter;
     Spinner sort;
     CheckBox arts;
@@ -71,7 +75,7 @@ public class FilterDialogFragment extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
- binding = DataBindingUtil.inflate(LayoutInflater.from(getContext()), R.layout.filter_layout, null, false);
+ binding = DataBindingUtil.inflate(LayoutInflater.from(getContext()), com.codepath.alse.nytimessearch.R.layout.filter_layout, null, false);
 
         binding.setHandlers(this);
         return binding.getRoot();
@@ -81,7 +85,7 @@ public class FilterDialogFragment extends DialogFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
       //  ButterKnife.bind(this, view);
 
-        filter = (Filter) Parcels.unwrap(getArguments().getParcelable("Filter"));
+        filter = (Filter) Parcels.unwrap(getArguments().getParcelable(EXTRA_FILTER));
 
 
        // date = (EditText) view.findViewById(R.id.sort_dateValue);
@@ -94,7 +98,8 @@ public class FilterDialogFragment extends DialogFragment {
             date.setText(filter.getDate());
         }
         Log.v("dsff",filter.toString());
-        ArrayAdapter<CharSequence> sort_adapter = ArrayAdapter.createFromResource(getContext(),R.array.sort_order,android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> sort_adapter = ArrayAdapter.createFromResource(getContext(),R.array.sort_order,android.
+        R.layout.simple_spinner_item);
         sort.setAdapter(sort_adapter);
         sort.setSelection(sort_adapter.getPosition(filter.getSortOrder()));
         fashion.setChecked(filter.isFashion());

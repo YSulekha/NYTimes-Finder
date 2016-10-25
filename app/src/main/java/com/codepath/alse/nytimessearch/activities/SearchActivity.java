@@ -1,4 +1,4 @@
-package com.codepath.alse.nytimessearch;
+package com.codepath.alse.nytimessearch.activities;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -11,8 +11,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.customtabs.CustomTabsIntent;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -24,16 +22,24 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.codepath.alse.nytimessearch.Adapter.ArticleRecyclerViewAdapter;
+import com.codepath.alse.nytimessearch.BuildConfig;
 import com.codepath.alse.nytimessearch.Model.Article;
 import com.codepath.alse.nytimessearch.Model.ArticleResponse;
 import com.codepath.alse.nytimessearch.Model.Doc;
 import com.codepath.alse.nytimessearch.Model.Filter;
+import com.codepath.alse.nytimessearch.R;
 import com.codepath.alse.nytimessearch.databinding.ActivitySearchBinding;
+import com.codepath.alse.nytimessearch.fragments.FilterDialogFragment;
+import com.codepath.alse.nytimessearch.utils.ApiClient;
+import com.codepath.alse.nytimessearch.utils.ApiInterface;
+import com.codepath.alse.nytimessearch.utils.EndlessScrollRecyclerViewListener;
+import com.codepath.alse.nytimessearch.utils.ItemClickSupport;
+import com.codepath.alse.nytimessearch.utils.NetworkingCalls;
+import com.codepath.alse.nytimessearch.utils.SpacesItemDecoration;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,124 +58,91 @@ import okhttp3.Request;
 import okhttp3.Response;
 import retrofit2.Retrofit;
 
-public class SearchActivity extends AppCompatActivity implements FilterDialogFragment.SaveFilterListener{
+public class SearchActivity extends AppCompatActivity implements FilterDialogFragment.SaveFilterListener {
 
     RecyclerView resultRecyclerView;
     TextView emptyView;
     ArrayList<Article> articles;
-   // ArticleArrayAdapter articleArrayAdapter;
- //   ArticleAdapter articleAdapter;
     ArticleRecyclerViewAdapter articleRecyclerViewAdapter;
     Filter filter = new Filter();
-    int pageN=0;
     String queryString;
     EndlessScrollRecyclerViewListener scrollRecyclerViewListener;
+   // ActivitySearchBinding binding;
     ActivitySearchBinding binding;
     static final String NO_DATA = "no_data";
     static final String NO_QUERY = "no_query";
+    int rec_padding = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       binding = DataBindingUtil.setContentView(this, R.layout.activity_search);
-        Toolbar toolbar = binding.toolbar;
 
+     //   binding = DataBindingUtil.setContentView(this, R.layout.activity_search);
+        binding = DataBindingUtil.setContentView(this,R.layout.activity_search);
+        Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
 
-            resultRecyclerView = binding.searchRel.searchRview;
-            emptyView = binding.searchRel.recyclerviewEmptyView;
-            articles = new ArrayList<>();
-            //articleArrayAdapter = new ArticleArrayAdapter(this,articles);
-            // resultGridView.setAdapter(articleArrayAdapter);
-            //    articleAdapter = new ArticleAdapter(this,articles);
-
-            articleRecyclerViewAdapter = new ArticleRecyclerViewAdapter(this, articles, emptyView);
-            resultRecyclerView.setAdapter(articleRecyclerViewAdapter);
-            StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
-            resultRecyclerView.setLayoutManager(staggeredGridLayoutManager);
-            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            });
-            scrollRecyclerViewListener = new EndlessScrollRecyclerViewListener(staggeredGridLayoutManager) {
-                @Override
-                public void onLoadMore(int page, int totalItemCount, RecyclerView view) {
-                    loadMoreDataFromApi(page);
-
-                }
-            };
-            resultRecyclerView.addOnScrollListener(scrollRecyclerViewListener);
-            SpacesItemDecoration itemDecoration = new SpacesItemDecoration(4);
-            resultRecyclerView.addItemDecoration(itemDecoration);
- /*       resultGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        resultRecyclerView = binding.searchRel.searchRview;
+        emptyView = binding.searchRel.recyclerviewEmptyView;
+        articles = new ArrayList<>();
+        articleRecyclerViewAdapter = new ArticleRecyclerViewAdapter(this, articles, emptyView);
+        resultRecyclerView.setAdapter(articleRecyclerViewAdapter);
+        StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        resultRecyclerView.setLayoutManager(staggeredGridLayoutManager);
+        scrollRecyclerViewListener = new EndlessScrollRecyclerViewListener(staggeredGridLayoutManager) {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent intent = new Intent(SearchActivity.this,ArticleActivity.class);
-                intent.putExtra("Article",articles.get(i).getWeb_url());
-                startActivity(intent);
-            }
-        });*/
-    /*    resultGridView.setOnScrollListener(new EndlessScrollListener() {
-            @Override
-            public boolean onLoadMore(int page, int totalItemCount) {
-                Log.v("LoadMore", String.valueOf(page));
+            public void onLoadMore(int page, int totalItemCount, RecyclerView view) {
                 loadMoreDataFromApi(page);
-                return true;
+
             }
-        });*/
-            if (queryString == null) {
-                updateEmptyView(NO_QUERY);
-            }
-            Context mContext = this;
-            ItemClickSupport.addTo(resultRecyclerView).setOnItemClickListener(
-                    new ItemClickSupport.OnItemClickListener() {
-                        @Override
-                        public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                            // do it
+        };
+        resultRecyclerView.addOnScrollListener(scrollRecyclerViewListener);
+        SpacesItemDecoration itemDecoration = new SpacesItemDecoration(rec_padding);
+        resultRecyclerView.addItemDecoration(itemDecoration);
+        if (queryString == null) {
+            updateEmptyView(NO_QUERY);
+        }
+        Context mContext = this;
 
-                            CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        ItemClickSupport.addTo(resultRecyclerView).setOnItemClickListener(
+                (recyclerView, position, v) -> {
 
-                            Activity activity = (Activity) mContext;
+                    CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                    Activity activity = (Activity) mContext;
+                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_share);
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("text/plain");
+                    intent.putExtra(Intent.EXTRA_TEXT, articles.get(position).getWeb_url());
+                    int requestCode = 100;
 
-                            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_share);
-                            Intent intent = new Intent(Intent.ACTION_SEND);
-                            intent.setType("text/plain");
-                            intent.putExtra(Intent.EXTRA_TEXT, articles.get(position).getWeb_url());
-                            int requestCode = 100;
-
-                            PendingIntent pendingIntent = PendingIntent.getActivity(mContext,
-                                    requestCode,
-                                    intent,
-                                    PendingIntent.FLAG_UPDATE_CURRENT);
-                            builder.setActionButton(bitmap, "Share Link", pendingIntent, true);
-                            CustomTabsIntent customTabsIntent = builder.build();
-                            customTabsIntent.launchUrl(activity, Uri.parse(articles.get(position).getWeb_url()));
-                        }
-                    }
-            );
-
-        if(savedInstanceState!=null){
+                    PendingIntent pendingIntent = PendingIntent.getActivity(mContext,
+                            requestCode,
+                            intent,
+                            PendingIntent.FLAG_UPDATE_CURRENT);
+                    builder.setActionButton(bitmap, "Share Link", pendingIntent, true);
+                    CustomTabsIntent customTabsIntent = builder.build();
+                    customTabsIntent.launchUrl(activity, Uri.parse(articles.get(position).getWeb_url()));
+                }
+        );
+        //On Orientation change restore the values and make the network call
+        if (savedInstanceState != null) {
             queryString = savedInstanceState.getString("query");
             filter = Parcels.unwrap(savedInstanceState.getParcelable("Filter"));
-            makeNetworkCall(queryString,0);
+            makeNetworkCall(queryString, 0);
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable("Filter",Parcels.wrap(filter));
-        outState.putString("query",queryString);
+        //Store the data for orientation change
+        outState.putParcelable("Filter", Parcels.wrap(filter));
+        outState.putString("query", queryString);
     }
 
-    public void loadMoreDataFromApi(int page){
-
-        makeNetworkCall(queryString,page);
-
+    //Method for loading more data while scrolling
+    public void loadMoreDataFromApi(int page) {
+        makeNetworkCall(queryString, page);
     }
 
     @Override
@@ -206,61 +179,59 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
             return true;
         }
 
-        if(id==R.id.action_filter){
+        if (id == R.id.action_filter) {
             createDialogFragment();
         }
 
         return super.onOptionsItemSelected(item);
     }
-
-    public void createDialogFragment(){
+//Method to create dialog fragment
+    public void createDialogFragment() {
         FragmentManager m = getSupportFragmentManager();
         Bundle args = new Bundle();
-        args.putParcelable("Filter", Parcels.wrap(filter));
-        FilterDialogFragment fD = FilterDialogFragment.newInstance(this,args);
-        fD.show(m,"dd");
+        args.putParcelable(FilterDialogFragment.EXTRA_FILTER, Parcels.wrap(filter));
+        FilterDialogFragment fD = FilterDialogFragment.newInstance(this, args);
+        fD.show(m, "dialog");
     }
 
     //Search method when clicked on Search icon
     public void onArticleSearch(String query) {
         queryString = query;
         articles.clear();
-      //  articleAdapter.notifyDataSetChanged();
         articleRecyclerViewAdapter.notifyDataSetChanged();
         scrollRecyclerViewListener.resetState();
+        resultRecyclerView.scrollToPosition(0);
         boolean isInternet = NetworkingCalls.isNetworkAvailable(this);
-        if(!isInternet){
-            Toast.makeText(this,"No Internet",Toast.LENGTH_LONG).show();
+        if (!isInternet) {
+            Toast.makeText(this, "No Internet", Toast.LENGTH_LONG).show();
             updateEmptyView("df");
-        }
-        else {
-          //  networkCalls(query,0);
+        } else {
             makeNetworkCall(query, 0);
         }
     }
 
-    public void makeNetworkCall(String query, final int page){
+    public void makeNetworkCall(String query, final int page) {
         String url = "http://api.nytimes.com/svc/search/v2/articlesearch.json";
         String apiKey = BuildConfig.NYTIMES_API_KEY;
         OkHttpClient httpClient = new OkHttpClient();
         HttpUrl.Builder urlbuilder = HttpUrl.parse(url).newBuilder();
-        urlbuilder.addQueryParameter("api-key",apiKey);
-        urlbuilder.addQueryParameter("page",String.valueOf(page));
-        if(filter.getDate()!=null){
-            urlbuilder.addQueryParameter("begin_date",filter.getDate());
+        urlbuilder.addQueryParameter("api-key", apiKey);
+        urlbuilder.addQueryParameter("page", String.valueOf(page));
+        if (filter.getDate() != null) {
+            urlbuilder.addQueryParameter("begin_date", filter.getDate());
         }
-        if(!TextUtils.isEmpty(query)) {
+        if (!TextUtils.isEmpty(query)) {
             urlbuilder.addQueryParameter("q", query);
         }
         String news = getNewsString();
-        if(news != null){
-            urlbuilder.addQueryParameter("fq",news);
+        if (news != null) {
+            urlbuilder.addQueryParameter("fq", news);
         }
-        if(filter.getSortOrder()!=null){
-            urlbuilder.addQueryParameter("sort",filter.getSortOrder());
+        if (filter.getSortOrder() != null) {
+            urlbuilder.addQueryParameter("sort", filter.getSortOrder());
         }
         String apiUrl = urlbuilder.build().toString();
-        Log.v("Url",apiUrl);
+        Log.v("Url", apiUrl);
         Request request = new Request.Builder().url(apiUrl).build();
 
         httpClient.newCall(request).enqueue(new Callback() {
@@ -272,32 +243,24 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String responseData = response.body().string();
-                Log.v("responseData",responseData);
-                pageN = page;
+                Log.v("responseData", responseData);
                 try {
                     JSONObject responseJson = new JSONObject(responseData);
-                    Log.v("response"+page,responseJson.toString());
-                    if(responseJson.has("response")) {
+                    Log.v("response" + page, responseJson.toString());
+                    if (responseJson.has("response")) {
                         JSONArray responseArray = responseJson.getJSONObject("response").getJSONArray("docs");
                         //   if(page > 0){
                         final int curSize = articleRecyclerViewAdapter.getItemCount();
                         final ArrayList<Article> newItems = Article.processJSONArray(responseArray);
                         articles.addAll(newItems);
 
-                        //  }
-                        //   else {
-                        //   articles.clear();
-                        //     articles.addAll(Article.processJSONArray(responseArray));
-                        //}
                         runOnUiThread(() -> {
                             articleRecyclerViewAdapter.notifyItemRangeInserted(curSize, newItems.size());
-                            //  articleAdapter.notifyDataSetChanged();
                         });
-                    }
-                    else{
-                        if(responseJson.has("message")){
+                    } else {
+                        if (responseJson.has("message")) {
                             String message = responseJson.getString("message");
-                            if(message.equals("API rate limit exceeded")){
+                            if (message.equals("API rate limit exceeded")) {
                                 runOnUiThread(() -> {
                                     Handler handler = new Handler();
 // Define the code block to be executed
@@ -321,36 +284,36 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
 
 
                 } catch (JSONException e) {
-                  //  Log.v("responseExc",e.getMessage());
-                    Log.v("Response","No data for the requested topic");
-                    queryString=null;
+
+                    Log.d("Response", "No data for the requested topic");
+                    queryString = null;
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             updateEmptyView(NO_DATA);
                         }
                     });
-
                     e.printStackTrace();
-                };
+                }
+                ;
             }
         });
 
     }
 
-    public void networkCalls(String query, final int page){
-    String apiKey = BuildConfig.NYTIMES_API_KEY;
+    public void networkCalls(String query, final int page) {
+        String apiKey = BuildConfig.NYTIMES_API_KEY;
 
         Retrofit retrofit = ApiClient.getClient();
         ApiInterface apiService = retrofit.create(ApiInterface.class);
-        retrofit2.Call<ArticleResponse> call = apiService.getArticleList(page,apiKey,query);
+        retrofit2.Call<ArticleResponse> call = apiService.getArticleList(page, apiKey, query);
         call.enqueue(new retrofit2.Callback<ArticleResponse>() {
             @Override
             public void onResponse(retrofit2.Call<ArticleResponse> call, retrofit2.Response<ArticleResponse> response) {
                 ArticleResponse articleResponse = response.body();
                 List<Doc> articles = response.body().getDocs();
-                for(int i=0;i<articles.size();i++){
-                    Log.v("articles",articles.get(0).getWebUrl());
+                for (int i = 0; i < articles.size(); i++) {
+                    Log.v("articles", articles.get(0).getWebUrl());
                 }
             }
 
@@ -360,16 +323,13 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
             }
         });
     }
-
+//Listener method when clicked on save button in dialog fragment
     @Override
     public void onSaveFilter(Filter f) {
-        Log.v("InsideOnSaveFiltre","dfsdf");
         filter = f;
-        Log.v("InsideOnSaveFiltre",queryString);
-        if(!NetworkingCalls.isNetworkAvailable(this)){
-            Toast.makeText(this,"No Internet",Toast.LENGTH_LONG).show();
-        }
-        else {
+        if (!NetworkingCalls.isNetworkAvailable(this)) {
+            Toast.makeText(this, "No Internet", Toast.LENGTH_LONG).show();
+        } else {
             articles.clear();
             //  articleAdapter.notifyDataSetChanged();
             articleRecyclerViewAdapter.notifyDataSetChanged();
@@ -377,28 +337,29 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
             makeNetworkCall(queryString, 0);
         }
     }
-
-    public String getNewsString(){
+//Method to format news desk string
+    public String getNewsString() {
         String news;
-        if(!(filter.isArts() || filter.isFashion() || filter.isSports())){
+        if (!(filter.isArts() || filter.isFashion() || filter.isSports())) {
             return null;
-        }
-        else{
+        } else {
             news = "news_desk:(";
-            if(filter.isArts()){
-                news = news+"\"Arts\"";
+            if (filter.isArts()) {
+                news = news + "\"Arts\"";
             }
-            if(filter.isFashion()){
-                news = news+","+"\"Fashion\"";
+            if (filter.isFashion()) {
+                news = news + "," + "\"Fashion\"";
             }
-            if(filter.isSports()){
-                news = news+","+"\"Sports\"";
+            if (filter.isSports()) {
+                news = news + "," + "\"Sports\"";
             }
-            news = news+")";
+            news = news + ")";
 
         }
         return news;
     }
+
+    //Updating empty textview according to network status
     private void updateEmptyView(String status) {
         if (articleRecyclerViewAdapter.getItemCount() == 0) {
             TextView tv = (TextView) findViewById(R.id.recyclerview_emptyView);

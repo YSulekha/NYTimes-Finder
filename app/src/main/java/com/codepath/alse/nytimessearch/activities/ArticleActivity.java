@@ -1,4 +1,4 @@
-package com.codepath.alse.nytimessearch;
+package com.codepath.alse.nytimessearch.activities;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
@@ -16,17 +16,20 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.codepath.alse.nytimessearch.R;
 import com.codepath.alse.nytimessearch.databinding.ActivityArticleBinding;
 
 public class ArticleActivity extends AppCompatActivity {
 
     ActivityArticleBinding binding;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
      //   setContentView(R.layout.activity_article);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_article);
+        binding = DataBindingUtil.setContentView(this,R.layout.activity_article);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Intent intent = getIntent();

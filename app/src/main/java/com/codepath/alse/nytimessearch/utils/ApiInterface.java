@@ -1,4 +1,4 @@
-package com.codepath.alse.nytimessearch;
+package com.codepath.alse.nytimessearch.utils;
 
 import com.codepath.alse.nytimessearch.Model.ArticleResponse;
 

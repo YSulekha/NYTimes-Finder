@@ -4,7 +4,7 @@
     <data>
         <variable
             name="handlers"
-            type="com.codepath.alse.nytimessearch.FilterDialogFragment"/>
+            type="com.codepath.alse.nytimessearch.fragments.FilterDialogFragment"/>
     </data>
 <RelativeLayout
     android:layout_width="match_parent"

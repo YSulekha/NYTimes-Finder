@@ -1,4 +1,4 @@
-package com.codepath.alse.nytimessearch;
+package com.codepath.alse.nytimessearch.utils;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

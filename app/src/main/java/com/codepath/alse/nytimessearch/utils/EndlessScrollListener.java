@@ -1,4 +1,4 @@
-package com.codepath.alse.nytimessearch;
+package com.codepath.alse.nytimessearch.utils;
 
 import android.util.Log;
 import android.widget.AbsListView;
