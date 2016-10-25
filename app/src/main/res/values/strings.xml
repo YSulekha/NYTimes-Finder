@@ -7,4 +7,7 @@
         <item>newest</item>
         <item>oldest</item>
     </string-array>
+
+    <string name="empty_fetch_data">Fetching Data..</string>
+    <string name="empty_string">No Stock Information Available.</string>
 </resources>

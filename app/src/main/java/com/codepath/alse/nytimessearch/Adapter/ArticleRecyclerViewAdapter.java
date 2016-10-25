@@ -8,7 +8,6 @@ import android.databinding.BindingAdapter;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v7.widget.RecyclerView;
@@ -16,11 +15,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.Request;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.codepath.alse.nytimessearch.BR;
 import com.codepath.alse.nytimessearch.Model.Article;
 import com.codepath.alse.nytimessearch.R;
@@ -39,11 +36,13 @@ public class ArticleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
     private List<Article> articleList;
     private static final int  TITLE = 0;
     private static final int IMAGE = 1;
+    private TextView emptyView;
 
 
-    public ArticleRecyclerViewAdapter(Context context, List<Article> list){
+    public ArticleRecyclerViewAdapter(Context context, List<Article> list, TextView view){
         this.mContext = context;
         this.articleList = list;
+        this.emptyView = view;
     }
 
     public Context getContext(){
@@ -109,8 +108,10 @@ public class ArticleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
         }
     }
 
+
     @Override
     public int getItemCount() {
+        emptyView.setVisibility(articleList.size() == 0 ? View.VISIBLE : View.INVISIBLE);
         return articleList.size();
     }
     public void shareIntent(String url){
@@ -135,7 +136,7 @@ public class ArticleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
     }
 
 
-    class ViewHolderImage extends RecyclerView.ViewHolder implements View.OnClickListener, com.bumptech.glide.request.target.Target<Bitmap>{
+    class ViewHolderImage extends RecyclerView.ViewHolder implements View.OnClickListener{
         GridItemBinding binding;
 
         public ViewHolderImage(View itemView) {
@@ -152,81 +153,13 @@ public class ArticleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
              /*   Intent intent = new Intent(mContext,ArticleActivity.class);
                 intent.putExtra("Article",article.getWeb_url());
                 mContext.startActivity(intent);*/
-                shareIntent(article.getWeb_url());
+               // shareIntent(article.getWeb_url());
             }
         }
 
 
 
-    /*    @Override
-        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-            float ratio = (float)bitmap.getHeight()/(float)bitmap.getWidth();
-            binding.gridItemImage.setHeightRatio(ratio);
-            binding.gridItemImage.setImageBitmap(bitmap);
-        }
 
-        @Override
-        public void onBitmapFailed(Drawable errorDrawable) {
-
-        }
-
-        @Override
-        public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-        }*/
-
-
-       @Override
-        public void onLoadStarted(Drawable placeholder) {
-
-        }
-
-        @Override
-        public void onLoadFailed(Exception e, Drawable errorDrawable) {
-
-        }
-
-        @Override
-        public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
-            float ratio = (float)bitmap.getHeight()/(float)bitmap.getWidth();
-            binding.gridItemImage.setHeightRatio(ratio);
-            binding.gridItemImage.setImageBitmap(bitmap);
-        }
-
-        @Override
-        public void onLoadCleared(Drawable placeholder) {
-
-        }
-
-        @Override
-        public void getSize(SizeReadyCallback cb) {
-
-        }
-
-        @Override
-        public void setRequest(Request request) {
-
-        }
-
-        @Override
-        public Request getRequest() {
-            return null;
-        }
-
-        @Override
-        public void onStart() {
-
-        }
-
-        @Override
-        public void onStop() {
-
-        }
-
-        @Override
-        public void onDestroy() {
-
-        }
     }
    public class ViewHolderTitle extends RecyclerView.ViewHolder implements View.OnClickListener{
         private RecycerItemBinding binding;
@@ -248,11 +181,9 @@ public class ArticleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
            /*     Intent intent = new Intent(mContext,ArticleActivity.class);
                 intent.putExtra("Article",article.getWeb_url());
                 mContext.startActivity(intent);*/
-                shareIntent(article.getWeb_url());
+               // shareIntent(article.getWeb_url());
 
             }
         }
-
-
     }
 }

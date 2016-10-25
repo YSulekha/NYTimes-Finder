@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto">
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
     <data>
         <variable
             name="article"
@@ -10,7 +12,13 @@
     android:id="@+id/card_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    card_view:cardUseCompatPadding="true">
+    card_view:cardUseCompatPadding="true"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="3dp"
+    android:foreground="?android:attr/selectableItemBackground">
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -21,8 +29,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/recycler_item_title"
-            android:adjustViewBounds="true"
-            android:scaleType="centerCrop"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            android:background="@color/headline_background"
+            android:fontFamily="sans-serif"
             android:text="@{article.headline}"
             />
         <TextView
@@ -32,6 +42,8 @@
             android:maxLines="4"
             android:minLines="2"
             android:ellipsize="end"
+            android:textColor="@android:color/black"
+            android:fontFamily="sans-serif"
             android:text="@{article.overview}"/>
 
 

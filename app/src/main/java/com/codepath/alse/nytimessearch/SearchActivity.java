@@ -1,7 +1,16 @@
 package com.codepath.alse.nytimessearch;
 
+import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
@@ -16,6 +25,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.codepath.alse.nytimessearch.Adapter.ArticleRecyclerViewAdapter;
@@ -45,6 +55,7 @@ import retrofit2.Retrofit;
 public class SearchActivity extends AppCompatActivity implements FilterDialogFragment.SaveFilterListener{
 
     RecyclerView resultRecyclerView;
+    TextView emptyView;
     ArrayList<Article> articles;
    // ArticleArrayAdapter articleArrayAdapter;
  //   ArticleAdapter articleAdapter;
@@ -54,6 +65,8 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
     String queryString;
     EndlessScrollRecyclerViewListener scrollRecyclerViewListener;
     ActivitySearchBinding binding;
+    static final String NO_DATA = "no_data";
+    static final String NO_QUERY = "no_query";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,33 +75,36 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
         Toolbar toolbar = binding.toolbar;
 
         setSupportActionBar(toolbar);
-        resultRecyclerView = binding.searchRel.searchRview;
-        articles = new ArrayList<>();
-        //articleArrayAdapter = new ArticleArrayAdapter(this,articles);
-       // resultGridView.setAdapter(articleArrayAdapter);
-    //    articleAdapter = new ArticleAdapter(this,articles);
-        articleRecyclerViewAdapter = new ArticleRecyclerViewAdapter(this,articles);
-        resultRecyclerView.setAdapter(articleRecyclerViewAdapter);
-        StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL);
-        resultRecyclerView.setLayoutManager(staggeredGridLayoutManager);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        scrollRecyclerViewListener = new EndlessScrollRecyclerViewListener(staggeredGridLayoutManager) {
-            @Override
-            public void onLoadMore(int page, int totalItemCount, RecyclerView view) {
-                loadMoreDataFromApi(page);
 
-            }
-        };
-        resultRecyclerView.addOnScrollListener(scrollRecyclerViewListener);
-        SpacesItemDecoration itemDecoration = new SpacesItemDecoration(8);
-        resultRecyclerView.addItemDecoration(itemDecoration);
+            resultRecyclerView = binding.searchRel.searchRview;
+            emptyView = binding.searchRel.recyclerviewEmptyView;
+            articles = new ArrayList<>();
+            //articleArrayAdapter = new ArticleArrayAdapter(this,articles);
+            // resultGridView.setAdapter(articleArrayAdapter);
+            //    articleAdapter = new ArticleAdapter(this,articles);
+
+            articleRecyclerViewAdapter = new ArticleRecyclerViewAdapter(this, articles, emptyView);
+            resultRecyclerView.setAdapter(articleRecyclerViewAdapter);
+            StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+            resultRecyclerView.setLayoutManager(staggeredGridLayoutManager);
+            FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+            });
+            scrollRecyclerViewListener = new EndlessScrollRecyclerViewListener(staggeredGridLayoutManager) {
+                @Override
+                public void onLoadMore(int page, int totalItemCount, RecyclerView view) {
+                    loadMoreDataFromApi(page);
+
+                }
+            };
+            resultRecyclerView.addOnScrollListener(scrollRecyclerViewListener);
+            SpacesItemDecoration itemDecoration = new SpacesItemDecoration(4);
+            resultRecyclerView.addItemDecoration(itemDecoration);
  /*       resultGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -105,8 +121,49 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
                 return true;
             }
         });*/
+            if (queryString == null) {
+                updateEmptyView(NO_QUERY);
+            }
+            Context mContext = this;
+            ItemClickSupport.addTo(resultRecyclerView).setOnItemClickListener(
+                    new ItemClickSupport.OnItemClickListener() {
+                        @Override
+                        public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                            // do it
 
+                            CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
 
+                            Activity activity = (Activity) mContext;
+
+                            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_share);
+                            Intent intent = new Intent(Intent.ACTION_SEND);
+                            intent.setType("text/plain");
+                            intent.putExtra(Intent.EXTRA_TEXT, articles.get(position).getWeb_url());
+                            int requestCode = 100;
+
+                            PendingIntent pendingIntent = PendingIntent.getActivity(mContext,
+                                    requestCode,
+                                    intent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT);
+                            builder.setActionButton(bitmap, "Share Link", pendingIntent, true);
+                            CustomTabsIntent customTabsIntent = builder.build();
+                            customTabsIntent.launchUrl(activity, Uri.parse(articles.get(position).getWeb_url()));
+                        }
+                    }
+            );
+
+        if(savedInstanceState!=null){
+            queryString = savedInstanceState.getString("query");
+            filter = Parcels.unwrap(savedInstanceState.getParcelable("Filter"));
+            makeNetworkCall(queryString,0);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable("Filter",Parcels.wrap(filter));
+        outState.putString("query",queryString);
     }
 
     public void loadMoreDataFromApi(int page){
@@ -174,6 +231,7 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
         boolean isInternet = NetworkingCalls.isNetworkAvailable(this);
         if(!isInternet){
             Toast.makeText(this,"No Internet",Toast.LENGTH_LONG).show();
+            updateEmptyView("df");
         }
         else {
           //  networkCalls(query,0);
@@ -214,29 +272,65 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String responseData = response.body().string();
+                Log.v("responseData",responseData);
                 pageN = page;
                 try {
-
                     JSONObject responseJson = new JSONObject(responseData);
-                    Log.v("response",responseJson.toString());
-                    JSONArray responseArray = responseJson.getJSONObject("response").getJSONArray("docs");
-                 //   if(page > 0){
-                       final int curSize = articleRecyclerViewAdapter.getItemCount();
-                      final  ArrayList<Article> newItems = Article.processJSONArray(responseArray);
+                    Log.v("response"+page,responseJson.toString());
+                    if(responseJson.has("response")) {
+                        JSONArray responseArray = responseJson.getJSONObject("response").getJSONArray("docs");
+                        //   if(page > 0){
+                        final int curSize = articleRecyclerViewAdapter.getItemCount();
+                        final ArrayList<Article> newItems = Article.processJSONArray(responseArray);
                         articles.addAll(newItems);
 
-                  //  }
-                 //   else {
+                        //  }
+                        //   else {
                         //   articles.clear();
-                   //     articles.addAll(Article.processJSONArray(responseArray));
-                    //}
-                    runOnUiThread(() -> {
-                        articleRecyclerViewAdapter.notifyItemRangeInserted(curSize,newItems.size());
-                      //  articleAdapter.notifyDataSetChanged();
-                    });
+                        //     articles.addAll(Article.processJSONArray(responseArray));
+                        //}
+                        runOnUiThread(() -> {
+                            articleRecyclerViewAdapter.notifyItemRangeInserted(curSize, newItems.size());
+                            //  articleAdapter.notifyDataSetChanged();
+                        });
+                    }
+                    else{
+                        if(responseJson.has("message")){
+                            String message = responseJson.getString("message");
+                            if(message.equals("API rate limit exceeded")){
+                                runOnUiThread(() -> {
+                                    Handler handler = new Handler();
+// Define the code block to be executed
+                                    Runnable runnableCode = new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            // Do something here on the main thread
+                                            Log.d("Handlers", "Called on main thread");
+                                            makeNetworkCall(queryString, page);
+                                            // Repeat this the same runnable code block again another 2 seconds
+
+                                        }
+                                    };
+// Start the initial runnable task by posting through the handler
+                                    handler.postDelayed(runnableCode, 2000);
+                                });
+
+                            }
+                        }
+                    }
 
 
                 } catch (JSONException e) {
+                  //  Log.v("responseExc",e.getMessage());
+                    Log.v("Response","No data for the requested topic");
+                    queryString=null;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateEmptyView(NO_DATA);
+                        }
+                    });
+
                     e.printStackTrace();
                 };
             }
@@ -304,5 +398,27 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
 
         }
         return news;
+    }
+    private void updateEmptyView(String status) {
+        if (articleRecyclerViewAdapter.getItemCount() == 0) {
+            TextView tv = (TextView) findViewById(R.id.recyclerview_emptyView);
+            String emptyString = getString(R.string.empty_string);
+            if (tv != null) {
+                switch (status) {
+                    case NO_DATA:
+                        emptyString = "No Article present for the requested topic";
+                        break;
+                    case NO_QUERY:
+                        emptyString = "Search to get interested articles";
+                        break;
+                    default:
+                        if (!NetworkingCalls.isNetworkAvailable(this)) {
+                            emptyString = "No Internet";
+                        }
+                        break;
+                }
+                tv.setText(emptyString);
+            }
+        }
     }
 }
