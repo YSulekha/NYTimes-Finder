@@ -16,11 +16,6 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 
-
-/**
- * Created by aharyadi on 10/20/16.
- */
-
 public class ArticleArrayAdapter extends ArrayAdapter<Article> {
     public ArticleArrayAdapter(Context context, List<Article> articles) {
         super(context, android.R.layout.simple_list_item_1,articles);
@@ -41,7 +36,6 @@ public class ArticleArrayAdapter extends ArrayAdapter<Article> {
             articleItemViewHolder = (ArticleItemViewHolder) convertView.getTag();
         }
         articleItemViewHolder.headline.setText(article.getHeadline());
-      //  if(article.getThumbnail()!=null)
         Picasso.with(context).load(article.getThumbnail()).placeholder(R.color.colorPrimary).
                 into(articleItemViewHolder.thumbnail);
         return convertView;

@@ -5,4 +5,7 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name ="toolbar_size">64dp</dimen>
     <dimen name="key_lines">16dp</dimen>
+    <dimen name="keyline_margin">4dp</dimen>
+    <dimen name = "recycler_view_padding_side">12dp</dimen>
+    <dimen name="recycler_view_padding_up">8dp</dimen>
 </resources>

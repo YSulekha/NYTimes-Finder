@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NYTimesSearch</string>
+    <string name="app_name">NYTimesFinder</string>
     <string name="action_settings">Settings</string>
     <string name="search_hinttext">Enter Search text here</string>
     <string name="btn_text">Search</string>
@@ -7,7 +7,17 @@
         <item>newest</item>
         <item>oldest</item>
     </string-array>
-
-    <string name="empty_fetch_data">Fetching Data..</string>
-    <string name="empty_string">No Stock Information Available.</string>
+    <string name="begin_date_text">Begin Date</string>
+    <string name="sort_order_text">Sort Order</string>
+    <string name="news_desk_text">News Desk Values</string>
+    <string name="checkbox_arts">Arts</string>
+    <string name="checkbox_fashion">Fashion &amp; Style</string>
+    <string name="checkbox_sports">Sports</string>
+    <string name="button_save">Save</string>
+    <string name="menu_share">Share</string>
+    <string name="menu_filter">Filter</string>
+    <string name="menu_search">Search</string>
+    <string name="empty_fetch_data">Search to get interested articles</string>
+<string name="empty_no_data">No Article present for the requested topic</string>
+    <string name="empty_string_noInternet">No Internet Available. The network is not available to fetch article.</string>
 </resources>

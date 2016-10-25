@@ -3,9 +3,6 @@ package com.codepath.alse.nytimessearch.utils;
 import android.util.Log;
 import android.widget.AbsListView;
 
-/**
- * Created by aharyadi on 10/22/16.
- */
 
 public  abstract class EndlessScrollListener implements AbsListView.OnScrollListener {
     private int visibleThreshold = 5;

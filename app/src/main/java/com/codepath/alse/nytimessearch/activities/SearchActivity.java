@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -22,8 +23,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.codepath.alse.nytimessearch.Adapter.ArticleRecyclerViewAdapter;
 import com.codepath.alse.nytimessearch.BuildConfig;
@@ -71,13 +72,14 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
     ActivitySearchBinding binding;
     static final String NO_DATA = "no_data";
     static final String NO_QUERY = "no_query";
-    int rec_padding = 4;
+    static final String NO_INTERNET = "no_internet";
+    int rec_padding = 2;
+    Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-     //   binding = DataBindingUtil.setContentView(this, R.layout.activity_search);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_search);
         Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
@@ -102,26 +104,12 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
         if (queryString == null) {
             updateEmptyView(NO_QUERY);
         }
-        Context mContext = this;
+        mContext = this;
 
         ItemClickSupport.addTo(resultRecyclerView).setOnItemClickListener(
                 (recyclerView, position, v) -> {
 
-                    CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
-                    Activity activity = (Activity) mContext;
-                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_share);
-                    Intent intent = new Intent(Intent.ACTION_SEND);
-                    intent.setType("text/plain");
-                    intent.putExtra(Intent.EXTRA_TEXT, articles.get(position).getWeb_url());
-                    int requestCode = 100;
-
-                    PendingIntent pendingIntent = PendingIntent.getActivity(mContext,
-                            requestCode,
-                            intent,
-                            PendingIntent.FLAG_UPDATE_CURRENT);
-                    builder.setActionButton(bitmap, "Share Link", pendingIntent, true);
-                    CustomTabsIntent customTabsIntent = builder.build();
-                    customTabsIntent.launchUrl(activity, Uri.parse(articles.get(position).getWeb_url()));
+                    shareIntent(position);
                 }
         );
         //On Orientation change restore the values and make the network call
@@ -130,6 +118,26 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
             filter = Parcels.unwrap(savedInstanceState.getParcelable("Filter"));
             makeNetworkCall(queryString, 0);
         }
+    }
+
+//Method to open chrome custom tab
+    public void shareIntent(int position){
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        builder.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        Activity activity = (Activity) mContext;
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_share);
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, articles.get(position).getWeb_url());
+        int requestCode = 100;
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setActionButton(bitmap, "Share Link", pendingIntent, true);
+        CustomTabsIntent customTabsIntent = builder.build();
+        customTabsIntent.launchUrl(activity, Uri.parse(articles.get(position).getWeb_url()));
     }
 
     @Override
@@ -151,6 +159,7 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
         getMenuInflater().inflate(R.menu.menu_search, menu);
         MenuItem searchItem = menu.findItem(R.id.action_search);
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -203,8 +212,7 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
         resultRecyclerView.scrollToPosition(0);
         boolean isInternet = NetworkingCalls.isNetworkAvailable(this);
         if (!isInternet) {
-            Toast.makeText(this, "No Internet", Toast.LENGTH_LONG).show();
-            updateEmptyView("df");
+            updateEmptyView(NO_INTERNET);
         } else {
             makeNetworkCall(query, 0);
         }
@@ -231,7 +239,6 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
             urlbuilder.addQueryParameter("sort", filter.getSortOrder());
         }
         String apiUrl = urlbuilder.build().toString();
-        Log.v("Url", apiUrl);
         Request request = new Request.Builder().url(apiUrl).build();
 
         httpClient.newCall(request).enqueue(new Callback() {
@@ -243,12 +250,18 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String responseData = response.body().string();
-                Log.v("responseData", responseData);
                 try {
                     JSONObject responseJson = new JSONObject(responseData);
-                    Log.v("response" + page, responseJson.toString());
                     if (responseJson.has("response")) {
                         JSONArray responseArray = responseJson.getJSONObject("response").getJSONArray("docs");
+                        if(responseArray.length()==0){
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    updateEmptyView(NO_DATA);
+                                }
+                            });
+                        }
                         //   if(page > 0){
                         final int curSize = articleRecyclerViewAdapter.getItemCount();
                         final ArrayList<Article> newItems = Article.processJSONArray(responseArray);
@@ -268,7 +281,6 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
                                         @Override
                                         public void run() {
                                             // Do something here on the main thread
-                                            Log.d("Handlers", "Called on main thread");
                                             makeNetworkCall(queryString, page);
                                             // Repeat this the same runnable code block again another 2 seconds
 
@@ -328,10 +340,9 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
     public void onSaveFilter(Filter f) {
         filter = f;
         if (!NetworkingCalls.isNetworkAvailable(this)) {
-            Toast.makeText(this, "No Internet", Toast.LENGTH_LONG).show();
+            updateEmptyView(NO_INTERNET);
         } else {
             articles.clear();
-            //  articleAdapter.notifyDataSetChanged();
             articleRecyclerViewAdapter.notifyDataSetChanged();
             scrollRecyclerViewListener.resetState();
             makeNetworkCall(queryString, 0);
@@ -361,20 +372,21 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
 
     //Updating empty textview according to network status
     private void updateEmptyView(String status) {
+        Log.v("dfd",status);
         if (articleRecyclerViewAdapter.getItemCount() == 0) {
             TextView tv = (TextView) findViewById(R.id.recyclerview_emptyView);
-            String emptyString = getString(R.string.empty_string);
+            String emptyString = getString(R.string.empty_fetch_data);
             if (tv != null) {
                 switch (status) {
                     case NO_DATA:
-                        emptyString = "No Article present for the requested topic";
+                        emptyString = getString(R.string.empty_no_data);
                         break;
                     case NO_QUERY:
-                        emptyString = "Search to get interested articles";
+                        emptyString = getString(R.string.empty_fetch_data);
                         break;
                     default:
                         if (!NetworkingCalls.isNetworkAvailable(this)) {
-                            emptyString = "No Internet";
+                            emptyString =getString(R.string.empty_string_noInternet);;
                         }
                         break;
                 }

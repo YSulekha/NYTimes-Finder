@@ -26,9 +26,6 @@ import com.codepath.alse.nytimessearch.databinding.RecycerItemBinding;
 
 import java.util.List;
 
-/**
- * Created by aharyadi on 10/24/16.
- */
 
 public class ArticleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -136,32 +133,18 @@ public class ArticleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
     }
 
 
-    class ViewHolderImage extends RecyclerView.ViewHolder implements View.OnClickListener{
+    class ViewHolderImage extends RecyclerView.ViewHolder{
         GridItemBinding binding;
 
         public ViewHolderImage(View itemView) {
             super(itemView);
             binding = DataBindingUtil.bind(itemView);
-            itemView.setOnClickListener(this);
+
         }
-
-        @Override
-        public void onClick(View view) {
-            int position = getAdapterPosition();
-            if(position != RecyclerView.NO_POSITION){
-                Article article = articleList.get(position);
-             /*   Intent intent = new Intent(mContext,ArticleActivity.class);
-                intent.putExtra("Article",article.getWeb_url());
-                mContext.startActivity(intent);*/
-               // shareIntent(article.getWeb_url());
-            }
-        }
-
-
 
 
     }
-   public class ViewHolderTitle extends RecyclerView.ViewHolder implements View.OnClickListener{
+   public class ViewHolderTitle extends RecyclerView.ViewHolder{
         private RecycerItemBinding binding;
        Activity activity;
 
@@ -169,21 +152,7 @@ public class ArticleRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
             super(itemView);
 
             binding = DataBindingUtil.bind(itemView);
-
-            itemView.setOnClickListener(this);
         }
 
-        @Override
-        public void onClick(View view) {
-            int position = getAdapterPosition();
-            if(position != RecyclerView.NO_POSITION){
-                Article article = articleList.get(position);
-           /*     Intent intent = new Intent(mContext,ArticleActivity.class);
-                intent.putExtra("Article",article.getWeb_url());
-                mContext.startActivity(intent);*/
-               // shareIntent(article.getWeb_url());
-
-            }
-        }
     }
 }

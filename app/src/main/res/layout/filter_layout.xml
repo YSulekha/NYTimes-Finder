@@ -16,7 +16,7 @@
     tools:context=".FilterDialogFragment">
 
     <TextView
-        android:text="Begin Date"
+        android:text="@string/begin_date_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -47,7 +47,7 @@
 
 
     <TextView
-        android:text="SortOrder"
+        android:text="@string/sort_order_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/sort_date"
@@ -78,7 +78,7 @@
 
 
     <TextView
-        android:text="News Desk Values"
+        android:text="@string/news_desk_text"
         android:textAppearance="?attr/textAppearanceLargePopupMenu"
         android:textColor="@android:color/black"
         android:textStyle="bold"
@@ -104,20 +104,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/checkbox_arts"
-            android:text="Arts"
+            android:text="@string/checkbox_arts"
             android:onClick="@{handlers.onCheck}"
             />
         <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/checkbox_fashion"
-            android:text="Fashion and Style"
+            android:text="@string/checkbox_fashion"
             android:onClick="@{handlers.onCheck}"/>
         <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/checkbox_sports"
-            android:text="Sports"
+            android:text="@string/checkbox_sports"
             android:onClick="@{handlers.onCheck}"/>
 
     </LinearLayout>
@@ -125,7 +125,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/news_values"
-        android:text="save"
+        android:text="@string/button_save"
         android:id="@+id/filter_save"
         android:onClick="@{handlers.onCheck}"
         />

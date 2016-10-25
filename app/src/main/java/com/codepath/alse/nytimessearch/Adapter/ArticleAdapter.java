@@ -49,7 +49,6 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
     public void onBindViewHolder(ViewHolder holder, int position) {
         Article article = articleList.get(position);
         holder.headline.setText(article.getHeadline());
-        //  if(article.getThumbnail()!=null)
         Picasso.with(mContext).load(article.getThumbnail()).placeholder(R.color.colorPrimary).
                 into(holder.thumbnail);
     }

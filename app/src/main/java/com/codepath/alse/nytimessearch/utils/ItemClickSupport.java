@@ -5,9 +5,6 @@ import android.view.View;
 
 import com.codepath.alse.nytimessearch.R;
 
-/**
- * Created by aharyadi on 10/24/16.
- */
 
 public class ItemClickSupport {
 

@@ -2,10 +2,6 @@ package com.codepath.alse.nytimessearch.Model;
 
 import org.parceler.Parcel;
 
-/**
- * Created by aharyadi on 10/22/16.
- */
-
 @Parcel
 public class Filter {
 

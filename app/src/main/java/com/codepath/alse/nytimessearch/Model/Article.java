@@ -9,9 +9,7 @@ import org.parceler.Parcel;
 
 import java.util.ArrayList;
 
-/**
- * Created by aharyadi on 10/20/16.
- */
+//Model for Article
 @Parcel
 public class Article {
 
@@ -49,7 +47,6 @@ public class Article {
             JSONArray multimediaArray = jsonObject.getJSONArray("multimedia");
             if(multimediaArray.length()>0){
                 this.thumbnail = "http://www.nytimes.com/"+multimediaArray.getJSONObject(0).getString("url");
-                Log.v("thimbnail",this.thumbnail);
             }
             this.headline = jsonObject.getJSONObject("headline").getString("main");
             if(jsonObject.getString("lead_paragraph")==null){
