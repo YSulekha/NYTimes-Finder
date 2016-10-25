@@ -19,5 +19,5 @@
     <string name="menu_search">Search</string>
     <string name="empty_fetch_data">Search to get interested articles</string>
 <string name="empty_no_data">No Article present for the requested topic</string>
-    <string name="empty_string_noInternet">No Internet Available. The network is not available to fetch article.</string>
+    <string name="empty_string_noInternet">No Internet connection to fetch articles.</string>
 </resources>

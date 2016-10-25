@@ -1,55 +1,59 @@
-# Project 1 - *Flickster*
+# Project 2 - *NYTimesFinder*
 
-Flickster shows the latest movies currently playing in theaters. The app utilizes the Movie Database API to display images and basic information about these movies to the user.
+**NYTimesFinder** is an android app that allows a user to search for articles on web using simple filters. The app utilizes [New York Times Search API](http://developer.nytimes.com/docs/read/article_search_api_v2).
 
-Note: Please initialize "MyMovieDbApiKey" and "MyYoutubeApiKey" parameter in gradle.properties with your MovieDB and youtube player Api key.
-
-Time spent: 24 hours spent in total
+Time spent: 30 hours spent in total
 
 ## User Stories
 
 The following **required** functionality is completed:
 
-* User can **scroll through current movies** from the Movie Database API
-* Layout is optimized with the [ViewHolder](http://guides.codepath.com/android/Using-an-ArrayAdapter-with-ListView#improving-performance-with-the-viewholder-pattern) pattern.
-* For each movie displayed, user can see the following details:
-  *  Title, Poster Image, Overview (Portrait mode)
-  * Title, Backdrop Image, Overview (Landscape mode)
+* User can **search for news article** by specifying a query and launching a search. Search displays a grid of image results from the New York Times Search API.
+* User can click on "settings" which allows selection of **advanced search options** to filter results
+*  User can configure advanced search filters such as:
+  * Begin Date (using a date picker)
+  * News desk values (Arts, Fashion & Style, Sports)
+  *  Sort order (oldest or newest)
+* Subsequent searches have any filters applied to the search results
+* User can tap on any article in results to view the contents in an embedded browser.
+*  User can **scroll down to see more articles**. The maximum number of articles is limited by the API search.
 
 The following **optional** features are implemented:
 
-* User can **pull-to-refresh** popular stream to get the latest movies.
-* Display a nice default [placeholder graphic](http://guides.codepath.com/android/Displaying-Images-with-the-Picasso-Library#configuring-picasso) for each image during loading.
-* Improved the user interface through styling and coloring.
+* Implements robust error handling, [check if internet is available](http://guides.codepath.com/android/Sending-and-Managing-Network-Requests#checking-for-network-connectivity), handle error cases, network failures
+*  Used the **ActionBar SearchView** or custom layout as the query box instead of an EditText
+* [User can **share an article link** to their friends or email it to themselves
+*  Replaced Filter Settings Activity with a lightweight modal overlay
+*  Improved the user interface and experiment with image assets and/or styling and coloring
 
 The following **bonus** features are implemented:
 
-* Allow user to view details of the movie including ratings and popularity within a separate activity or dialog fragment.
-* When viewing a popular movie (i.e. a movie voted for more than 5 stars) the video should show the full backdrop image as the layout.  Uses [Heterogenous ListViews](http://guides.codepath.com/android/Implementing-a-Heterogenous-ListView) or [Heterogenous RecyclerView](http://guides.codepath.com/android/Heterogenous-Layouts-inside-RecyclerView) to show different layouts.
-* Allow video trailers to be played in full-screen using the YouTubePlayerView.
-    *  Overlay a play icon for videos that can be played.
-    * More popular movies should start a separate activity that plays the video immediately.
-    * Less popular videos rely on the detail page should show ratings and a YouTube preview.
-* Apply the popular [Butterknife annotation library](http://guides.codepath.com/android/Reducing-View-Boilerplate-with-Butterknife) to reduce boilerplate code.
-* Apply rounded corners for the poster or background images using [Picasso transformations](https://guides.codepath.com/android/Displaying-Images-with-the-Picasso-Library#other-transformations)
-*  Replaced android-async-http network client with the popular [OkHttp](http://guides.codepath.com/android/Using-OkHttp) or [Volley](http://guides.codepath.com/android/Networking-with-the-Volley-Library) networking libraries.
+* Use the [RecyclerView](http://guides.codepath.com/android/Using-the-RecyclerView) with the `StaggeredGridLayoutManager` to display improve the grid of image results
+*  For different news articles that only have text or only have images, use [Heterogenous Layouts](http://guides.codepath.com/android/Heterogenous-Layouts-inside-RecyclerView) with RecyclerView
+*  Use Parcelable instead of Serializable using the popular [Parceler library](http://guides.codepath.com/android/Using-Parceler).
+*  Leverages the [data binding support module](http://guides.codepath.com/android/Applying-Data-Binding-for-Views) to bind data into layout templates.
+*  Replace all icon drawables and other static image assets with [vector drawables](http://guides.codepath.com/android/Drawables#vector-drawables) where appropriate.
+*  Replace Picasso with [Glide](http://inthecheesefactory.com/blog/get-to-know-glide-recommended-by-google/en) for more efficient image rendering.
+*  Uses [retrolambda expressions](http://guides.codepath.com/android/Lambda-Expressions) to cleanup event handling blocks.
+* Replace the embedded `WebView` with [Chrome Custom Tabs](http://guides.codepath.com/android/Chrome-Custom-Tabs) using a custom action button for sharing. (_**2 points**_)
 
 
 ## Video Walkthrough
 
 Here's a walkthrough of implemented user stories:
 
-<img src='https://github.com/YSulekha/Flickster/blob/master/Flickster.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src='https://github.com/YSulekha/NYTimesSearch/blob/master/NYReader.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
+
+## Notes
+
+Describe any challenges encountered while building the app.
 
 ## Open-source libraries used
 
 - [Android Async HTTP](https://github.com/loopj/android-async-http) - Simple asynchronous HTTP requests with JSON parsing
 - [Picasso](http://square.github.io/picasso/) - Image loading and caching library for Android
-- [Parceler](https://github.com/johncarl81/parceler) - Code generation library that generates the Android Parcelable boilerplate source code
-- [Butterknife](https://github.com/JakeWharton/butterknife) - Popular View "injection" library for Android
-- [Volley](https://github.com/mcxiaoke/android-volley)- library that makes networking for Android apps easier
 
 ## License
 
