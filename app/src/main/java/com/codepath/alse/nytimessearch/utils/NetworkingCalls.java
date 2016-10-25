@@ -3,6 +3,15 @@ package com.codepath.alse.nytimessearch.utils;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
+
+import com.codepath.alse.nytimessearch.BuildConfig;
+import com.codepath.alse.nytimessearch.Model.ArticleResponse;
+import com.codepath.alse.nytimessearch.Model.Doc;
+
+import java.util.List;
+
+import retrofit2.Retrofit;
 
 //Utility class for Networking Calls
 public class NetworkingCalls {
@@ -12,96 +21,28 @@ public class NetworkingCalls {
         return networkInfo != null && networkInfo.isConnectedOrConnecting();
     }
 
- /*   public void makeNetworkCall(String query, final int page, Filter filter) {
-        String url = "http://api.nytimes.com/svc/search/v2/articlesearch.json";
+    //Call using retrofit
+    public void networkCalls(String query, final int page) {
         String apiKey = BuildConfig.NYTIMES_API_KEY;
 
-        OkHttpClient httpClient = new OkHttpClient();
-        HttpUrl.Builder urlbuilder = HttpUrl.parse(url).newBuilder();
-        urlbuilder.addQueryParameter("api-key", apiKey);
-        urlbuilder.addQueryParameter("page", String.valueOf(page));
-        if (filter.getDate() != null) {
-            urlbuilder.addQueryParameter("begin_date", filter.getDate());
-        }
-        if (!TextUtils.isEmpty(query)) {
-            urlbuilder.addQueryParameter("q", query);
-        }
-        String news = getNewsString();
-        if (news != null) {
-            urlbuilder.addQueryParameter("fq", news);
-        }
-        if (filter.getSortOrder() != null) {
-            urlbuilder.addQueryParameter("sort", filter.getSortOrder());
-        }
-        String apiUrl = urlbuilder.build().toString();
-        Log.v("Url", apiUrl);
-        Request request = new Request.Builder().url(apiUrl).build();
-
-        httpClient.newCall(request).enqueue(new Callback() {
+        Retrofit retrofit = ApiClient.getClient();
+        ApiInterface apiService = retrofit.create(ApiInterface.class);
+        retrofit2.Call<ArticleResponse> call = apiService.getArticleList(page, apiKey, query);
+        call.enqueue(new retrofit2.Callback<ArticleResponse>() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
+            public void onResponse(retrofit2.Call<ArticleResponse> call, retrofit2.Response<ArticleResponse> response) {
+                ArticleResponse articleResponse = response.body();
+                List<Doc> articles = response.body().getDocs();
+                for (int i = 0; i < articles.size(); i++) {
+                    Log.v("articles", articles.get(0).getWebUrl());
+                }
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                String responseData = response.body().string();
-                Log.v("responseData", responseData);
-                try {
-                    JSONObject responseJson = new JSONObject(responseData);
-                    Log.v("response" + page, responseJson.toString());
-                    if (responseJson.has("response")) {
-                        JSONArray responseArray = responseJson.getJSONObject("response").getJSONArray("docs");
-                        //   if(page > 0){
-                        final int curSize = articleRecyclerViewAdapter.getItemCount();
-                        final ArrayList<Article> newItems = Article.processJSONArray(responseArray);
-                        articles.addAll(newItems);
+            public void onFailure(retrofit2.Call<ArticleResponse> call, Throwable t) {
 
-                        runOnUiThread(() -> {
-                            articleRecyclerViewAdapter.notifyItemRangeInserted(curSize, newItems.size());
-                        });
-                    } else {
-                        if (responseJson.has("message")) {
-                            String message = responseJson.getString("message");
-                            if (message.equals("API rate limit exceeded")) {
-                                runOnUiThread(() -> {
-                                    Handler handler = new Handler();
-// Define the code block to be executed
-                                    Runnable runnableCode = new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            // Do something here on the main thread
-                                            Log.d("Handlers", "Called on main thread");
-                                            makeNetworkCall(query, page,filter);
-                                            // Repeat this the same runnable code block again another 2 seconds
-
-                                        }
-                                    };
-// Start the initial runnable task by posting through the handler
-                                    handler.postDelayed(runnableCode, 2000);
-                                });
-
-                            }
-                        }
-                    }
-
-
-                } catch (JSONException e) {
-
-                    Log.d("Response", "No data for the requested topic");
-                    queryString = null;
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            updateEmptyView(NO_DATA);
-                        }
-                    });
-                    e.printStackTrace();
-                }
-                ;
             }
         });
-
-    }*/
+    }
 
 }

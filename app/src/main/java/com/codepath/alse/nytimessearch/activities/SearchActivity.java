@@ -23,20 +23,15 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.codepath.alse.nytimessearch.Adapter.ArticleRecyclerViewAdapter;
 import com.codepath.alse.nytimessearch.BuildConfig;
 import com.codepath.alse.nytimessearch.Model.Article;
-import com.codepath.alse.nytimessearch.Model.ArticleResponse;
-import com.codepath.alse.nytimessearch.Model.Doc;
 import com.codepath.alse.nytimessearch.Model.Filter;
 import com.codepath.alse.nytimessearch.R;
 import com.codepath.alse.nytimessearch.databinding.ActivitySearchBinding;
 import com.codepath.alse.nytimessearch.fragments.FilterDialogFragment;
-import com.codepath.alse.nytimessearch.utils.ApiClient;
-import com.codepath.alse.nytimessearch.utils.ApiInterface;
 import com.codepath.alse.nytimessearch.utils.EndlessScrollRecyclerViewListener;
 import com.codepath.alse.nytimessearch.utils.ItemClickSupport;
 import com.codepath.alse.nytimessearch.utils.NetworkingCalls;
@@ -49,7 +44,6 @@ import org.parceler.Parcels;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -57,7 +51,6 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import retrofit2.Retrofit;
 
 public class SearchActivity extends AppCompatActivity implements FilterDialogFragment.SaveFilterListener {
 
@@ -313,28 +306,7 @@ public class SearchActivity extends AppCompatActivity implements FilterDialogFra
 
     }
 
-    public void networkCalls(String query, final int page) {
-        String apiKey = BuildConfig.NYTIMES_API_KEY;
 
-        Retrofit retrofit = ApiClient.getClient();
-        ApiInterface apiService = retrofit.create(ApiInterface.class);
-        retrofit2.Call<ArticleResponse> call = apiService.getArticleList(page, apiKey, query);
-        call.enqueue(new retrofit2.Callback<ArticleResponse>() {
-            @Override
-            public void onResponse(retrofit2.Call<ArticleResponse> call, retrofit2.Response<ArticleResponse> response) {
-                ArticleResponse articleResponse = response.body();
-                List<Doc> articles = response.body().getDocs();
-                for (int i = 0; i < articles.size(); i++) {
-                    Log.v("articles", articles.get(0).getWebUrl());
-                }
-            }
-
-            @Override
-            public void onFailure(retrofit2.Call<ArticleResponse> call, Throwable t) {
-
-            }
-        });
-    }
 //Listener method when clicked on save button in dialog fragment
     @Override
     public void onSaveFilter(Filter f) {

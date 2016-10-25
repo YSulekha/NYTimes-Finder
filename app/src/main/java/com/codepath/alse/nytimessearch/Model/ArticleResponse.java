@@ -1,9 +1,5 @@
 package com.codepath.alse.nytimessearch.Model;
 
-/**
- * Created by aharyadi on 10/24/16.
- */
-
 import java.util.ArrayList;
 import java.util.List;
 

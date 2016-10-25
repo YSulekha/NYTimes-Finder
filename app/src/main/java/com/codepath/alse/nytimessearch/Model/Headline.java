@@ -1,8 +1,5 @@
 package com.codepath.alse.nytimessearch.Model;
 
-/**
- * Created by aharyadi on 10/24/16.
- */
 
 import org.parceler.Generated;
 
